@@ -1,0 +1,2 @@
+Body: {"msisdn":"15197816103","to":"12893490912","messageId":"0300000027F1072A","text":"nexmo message","type":"text","message-timestamp":"2013-10-26 16:40:46"}
+URI: /inbound

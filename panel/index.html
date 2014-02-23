@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Control Panel</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body><!-- style="font-family:'RTWS YueRoundedGothic Demo'">-->
+	<script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+	<script type="text/javascript" src="js/bootstrap.js"></script>
+	<script type="text/javascript">
+	
+	var baseURL = 'http://sms.uwcssa.com:8081';
+	
+	function sendVoteCommand( cmd ) {
+		$.ajax( {
+			method: 'POST',
+			url: baseURL + '/votectrl',
+			dataType: 'json',
+			data: cmd
+		} );
+	}
+	
+	function sendControlCommand( cmd ) {
+		$.ajax( {
+			method: 'POST',
+			url: baseURL + '/control',
+			dataType: 'json',
+			data: cmd
+		} );
+	}
+	
+	function switchToState( state ) {
+		var cmd = { opcode: 'setstate',
+					newState: state };
+		
+		if( state == 'RANK' ) {
+			if( confirm( 'Accept votes?' ) ) {
+				cmd.acceptingVotes = 'true';
+			} else {
+				cmd.acceptingVotes = 'false';
+			}
+		}
+
+		
+		sendVoteCommand( cmd );
+	}
+	
+	function setCandidateID() {
+		var id = document.forms["setCidForm"]["cidbox"].value;
+		var conclude = document.forms["setCidForm"]["concludedbox"].checked;
+		
+		if( parseInt( id ).toString() !== id ) {
+			alert( 'Invalid id' );
+			return;
+		}
+		
+		var cmd = { opcode: 'setcid',
+					cid: parseInt( id ) };
+					
+		if( conclude ) {
+			cmd.concluded = 'true';
+		}
+		
+		sendVoteCommand( cmd );
+	}
+	
+	function addScore() {
+		var score = document.forms["addScoreForm"]["scorebox"].value;
+		var reset = document.forms["addScoreForm"]["resetbox"].checked;
+		var candidate = document.forms["addScoreForm"]["candidatebox"].value;
+		
+		if( parseInt( score ).toString() !== score ) {
+			alert( 'Invalid score' );
+			return;
+		}
+		
+		if( parseInt( score ).toString() !== score ) {
+			alert( 'Invalid score' );
+			return;
+		}
+		
+		var cmd = { opcode: 'addscore',
+					score: score,
+					candidate: candidate };
+		
+		if( reset ) {
+			cmd.reset = 'true';
+		}
+		
+		sendVoteCommand( cmd );
+		
+	}
+	
+	function tdSetRoundID() {
+		var roundID = document.forms["SetRoundIDForm"]["RoundIDInput"].value;
+		var conclude = document.forms["SetRoundIDForm"]["TDConcludeInput"].checked;
+		
+		if( parseInt( roundID ).toString() !== roundID ) {
+			alert( 'Invalid round' );
+			return false;
+		}
+		
+		var cmd = { opcode: 'setround',
+					round_id: roundID };
+		
+		if( conclude ) {
+			cmd.concluded = 'true';
+		}
+		
+		sendVoteCommand( cmd );
+	}
+	
+	function tdAddScore() {
+		var s = document.forms["TDAddScoreForm"]["ScoreInput"].value;
+		var c_id = document.forms["TDAddScoreForm"]["CIDInput"].value;
+		var r = document.forms["TDAddScoreForm"]["TDResetScoreInput"].checked;
+		
+		if( parseInt( s ).toString() !== s ) {
+			alert( 'Invalid score' );
+			return false;
+		}
+		
+		if( parseInt( c_id ).toString() !== c_id ) {
+			alert( 'Invalid Candidate ID' );
+			return false;
+		}
+		
+		var cmd = { opcode: 'addscore',
+					scores: [ { cid: parseInt( c_id ), 
+								score: parseInt( s ) } ] };
+		
+		if( r ) {
+			cmd.scores[0].reset = 'true';
+		}
+		
+		sendVoteCommand( cmd );
+	}
+	
+	function tdSetTimer() {
+		var t = document.forms["TDSetTimerForm"]["SetTimerInput"].value;
+		
+		if( parseInt( t ).toString() !== t ) {
+			alert( 'Invalid timer' );
+			return false;
+		}
+		
+		var cmd = { opcode: 'settimer',
+					cd: parseInt( t ) };
+		
+		sendVoteCommand( cmd );
+	}
+	
+	function pollAudienceWinner() {
+		var notify = document.forms["PollAudienceWinnerForm"]["NotifyWinnerInput"].checked;
+		var delay = document.forms["PollAudienceWinnerForm"]["NotifyWinnerDelayInput"].value;
+		
+		var cmd = { opcode: 'poll' };
+		
+		if( notify ) {
+			cmd.notifyWinner = 'true';
+		}
+		
+		if( parseInt( delay ).toString() === delay ) {
+			cmd.delay = delay;
+		}
+		
+		sendControlCommand( cmd );
+	}
+
+	
+	</script>
+	<h1 style="margin-top: 30px; padding-left: 10%;">Control Panel</h1>
+	
+	<div style="width: 550px; height: 450px; margin: auto; padding-top: 10px;">
+		
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#TimedDuel" data-toggle="tab">Timed Duel</a></li>
+			<li><a href="#SingleVote" data-toggle="tab">Single Vote</a></li>
+			<li><a href="#PollAudience" data-toggle="tab">Poll Audience</a></li>
+		</ul>
+		
+		<div class="tab-content" style="height: 100%; padding-top: 10px;">
+			<div class="tab-pane fade in active" id="TimedDuel">
+				
+				<div style="width: 100%; height: 100%; margin: auto; padding-top: 20px;">
+					
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#td-idle" data-toggle="tab">Idle</a></li>
+						<li><a href="#td-voting" data-toggle="tab">Voting</a></li>
+						<li><a href="#td-voted" data-toggle="tab">Voted</a></li>
+						<li><a href="#td-result" data-toggle="tab">Result</a></li>
+						<li><a href="#td-setTimer" data-toggle="tab">Timer</a></li>
+					</ul>
+					
+					<div class="tab-content" style="height: 100%; padding-top: 10px;">
+					
+						<div class="tab-pane fade active in" id="td-idle">
+							<span>Switch to state:</span>
+							<button name="idleState" type="button" value="IDLE" onclick="switchToState( this.value );">Idle State</button><br />
+							<div class="panel panel-default" style="margin-top: 20px;">
+								<div class="panel-body">
+									<form class="form-horizontal" id="SetRoundIDForm" action="javascript: void(0);" role="form" style="width: 100%" onsubmit="tdSetRoundID()">
+										<div class="form-group">
+											<label for="RoundID" class="col-sm-3 control-label">Round ID</label>
+											<div class="col-sm-9">
+												<input type="text" class="form-control" id="RoundIDInput" placeholder="Round ID">
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-sm-offset-3 col-sm-9">
+												<div class="checkbox">
+													<label>
+														<input type="checkbox" id="TDConcludeInput">Conclude last round
+													</label>
+												</div>
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-sm-offset-3 col-sm-9">
+												<button id="BtnSubmitSetRound" type="submit" class="btn btn-default">Submit</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+						
+						<div class="tab-pane fade" id="td-voting">
+							<span>Switch to state:</span>
+							<button name="votingState" type="button" value="VOTING" onclick="switchToState( this.value );">Voting State</button>
+							<div class="panel panel-default" style="margin-top: 20px;">
+								<div class="panel-body">
+									<form class="form-horizontal" id="TDAddScoreForm" action="javascript: void(0);" role="form" style="width: 100%" onsubmit="tdAddScore()">
+										<div class="form-group">
+											<label for="CIDInput" class="col-sm-3 control-label">Candidate ID</label>
+											<div class="col-sm-9">
+												<input type="text" class="form-control" id="CIDInput" placeholder="Candidate ID">
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="ScoreInput" class="col-sm-3 control-label">Score</label>
+											<div class="col-sm-9">
+												<input type="text" class="form-control" id="ScoreInput" placeholder="Score">
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-sm-offset-3 col-sm-9">
+												<div class="checkbox">
+													<label>
+														<input type="checkbox" id="TDResetScoreInput">Reset
+													</label>
+												</div>
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-sm-offset-3 col-sm-9">
+												<button type="submit" class="btn btn-default">Submit</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+						
+						<div class="tab-pane fade" id="td-voted">
+							<span>Switch to state:</span>
+							<button name="votedState" type="button" value="VOTED" onclick="switchToState( this.value );">Voted State</button>
+						</div>
+						
+						<div class="tab-pane fade" id="td-result">
+							<span>Switch to state:</span>
+							<button name="resultState" type="button" value="RESULT" onclick="switchToState( this.value );">Result State</button>
+						</div>
+						
+						<div class="tab-pane fade" id="td-setTimer">
+							<form class="form-horizontal" id="TDSetTimerForm" action="javascript: void(0);" role="form" style="width: 100%" onsubmit="tdSetTimer()">
+								<div class="form-group">
+									<label for="TimerInput" class="col-sm-2 control-label">Timer</label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" id="SetTimerInput" placeholder="Timer">
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="col-sm-offset-2 col-sm-8">
+										<button type="submit" class="btn btn-default">Submit</button>
+									</div>
+								</div>
+							</form>
+						</div>
+						
+					</div>
+					
+				</div>
+				
+			</div>
+			
+			<div class="tab-pane fade" id="SingleVote">
+				
+				<div style="width: 100%; height: 300px; margin: auto; padding-top: 20px;">
+	
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#sv-idle" data-toggle="tab">Idle</a></li>
+						<li><a href="#sv-voting" data-toggle="tab">Voting</a></li>
+						<li><a href="#sv-result" data-toggle="tab">Result</a></li>
+						<li><a href="#sv-rank" data-toggle="tab">Rank</a></li>
+					</ul>
+					
+					<div class="tab-content" style="height: 100%; padding-top: 10px;">
+						<div class="tab-pane fade in active" id="sv-idle">
+							<span>Switch to state:</span>
+							<button name="idleState" type="button" value="IDLE" onclick="switchToState( this.value );">Idle State</button><br />
+							<div class="panel panel-default" style="margin-top: 20px;">
+								<div class="panel-body">
+									<form name="setCidForm" onsubmit="setCandidateID();">
+										<table>
+											<tr>
+												<td>Candidate ID: </td>
+												<td><input type="text" name="cidbox"></td>
+											</tr>
+											<tr>
+												<td>Concluded: </td>
+												<td><input type="checkbox" name="concludedbox"></td>
+											</tr>
+											<tr>
+											</tr>
+										</table>
+									</form>
+									<br />
+									<button id="cmdSetCid" name="setCid" type="button" value="setCID" onclick="setCandidateID();">Set CID</button>
+								</div>
+							</div>
+							
+						</div>
+						
+						
+						<div class="tab-pane fade" id="sv-voting">
+							<span>Switch to state:</span>
+							<button name="votingState" type="button" value="VOTING" onclick="switchToState( this.value );">Voting State</button>
+						</div>
+						
+						
+						<div class="tab-pane fade" id="sv-result">
+							<span>Switch to state:</span>
+							<button name="resultState" type="button" value="RESULT" onclick="switchToState( this.value );">Result State</button>
+							<div class="panel panel-default" style="margin-top: 20px;">
+								<div class="panel-body">
+									<form name="addScoreForm" onsubmit="addScore();">
+										<table>
+											<tr>
+												<td>Candidate:</td>
+												<td><input type="text" name="candidatebox"></td>
+											</tr>
+											<tr>
+												<td>Add Score:</td>
+												<td><input type="text" name="scorebox"></td>
+											</tr>
+											<tr>
+												<td>Reset</td>
+												<td><input type="checkbox" name="resetbox"></td>
+											</tr>
+										</table>
+									</form>
+									<br />
+									<button id="cmdAddScore"  name="addScore" type="button" value="addScore" onclick="addScore();">Add Score</button>
+								</div>
+							</div>
+						</div>
+						
+						
+						<div class="tab-pane fade" id="sv-rank">
+							<span>Switch to state:</span>
+							<button name="rankState" type="button" value="RANK" onclick="switchToState( this.value );">Rank State</button>
+						</div>
+					</div>
+				
+				</div>
+				
+			</div>
+			
+			<div class="tab-pane fade" id="PollAudience">
+				<div class="panel panel-default">
+					<div class="panel-body">
+					
+						<div style="width: 100%; margin: auto;">
+							<form role="form-horizontal" id="PollAudienceWinnerForm" action="javascript: void(0);" onsubmit="pollAudienceWinner();">
+								<div class="form-group">
+									<label for="NotifyWinnerDelayInput" class="col-sm-4 control-label">Notification Delay</label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" id="NotifyWinnerDelayInput" placeholder="Delay Seconds">
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="col-sm-offset-4 col-sm-8">
+										<div class="checkbox">
+											<label>
+												<input type="checkbox" id="NotifyWinnerInput">Notify Winner
+											</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="col-sm-offset-4 col-sm-8">
+										<button type="submit" class="btn btn-primary">Poll</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+		
+	</div>
+	
+	
+	
+	<div class="panel panel-default" style="width: 700px; margin: auto;">
+		<div class="panel-heading">Result</div>
+		<div id="resultBar" class="panel-body"></div>
+	</div>
+	
+	
+	<script type="text/javascript">
+	function updateResultBar() {
+		$.ajax( {
+			method: 'GET',
+			url: baseURL + '/result',
+			dataType: 'json',
+			success: function( data ) {
+				$("#resultBar").html( JSON.stringify( data ) );
+				if( data.state != 'IDLE' ) {
+					$("#cmdSetCid").attr( 'disabled', 'disabled' );
+					$("#BtnSubmitSetRound").attr( 'disabled', 'disabled' );
+				} else {
+					$("#cmdSetCid").removeAttr( 'disabled' );
+					$("#BtnSubmitSetRound").removeAttr( 'disabled' );
+				}
+				
+			}
+		} );
+	}
+	
+	setInterval( "updateResultBar()", 1000 );
+	</script>
+</body>
+	
+
+</html>

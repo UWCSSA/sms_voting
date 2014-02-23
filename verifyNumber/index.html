@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Registration Verification</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<div class="panel panel-default" style="margin: 10px 10px 10px 10px; max-width: 500px;">
+			<div class="panel-heading">
+				<span>
+					Verify your registration here.
+				</span>
+			</div>
+			<div class="panel-body container" style="width: 100%">
+				<form id="VerificationForm" action="javascript: void(0)" role="form" style="width: 100%" onsubmit="checkNumber()">
+					<div class="form-group">
+						<label for="PhoneNumberInput">Phone Number</label>
+						<input type="text" class="form-control" id="PhoneNumberInput" placeholder="Example: 15191231234">
+						<p class="help-block">Please include country code</p>
+					</div>
+					<div class="form-group">
+						<label for="RegCodeInput">Registration Code</label>
+						<input type="text" class="form-control" id="RegCodeInput" placeholder="Example: ABCDEFGH">
+						<p class="help-block">Case insensetive</p>
+					</div>
+					<button type="submit" class="btn btn-primary">Submit</button>
+				</form>
+			</div>
+		</div>
+		
+		<script type="text/javascript">
+		
+		function checkNumber() {
+			var p_number = document.forms["VerificationForm"]["PhoneNumberInput"].value;
+			var reg_code = document.forms["VerificationForm"]["RegCodeInput"].value;
+			
+			var numberRegex = new RegExp( '^[0-9]{11}$', '' );
+			var codeRegex = new RegExp( '^[a-zA-Z]{8}$', '' );
+			
+			if( ! numberRegex.test( p_number ) ) {
+				alert( 'Please verify your phone number. We can only verify North American numbers.' );
+				return false;
+			}
+			
+			if( ! codeRegex.test( reg_code ) ) {
+				alert( 'Please verify your registration code.' );
+				return false;
+			}
+			
+			$.ajax( {
+				url: 'http://sms.uwcssa.com:8081/verify_number',
+				method: 'GET',
+				dataType: 'json',
+				data: {
+					number: p_number,
+					code: reg_code
+				},
+				success: function( result ) {
+					if( typeof result.result == 'boolean' ) {
+						if( result.result == true ) {
+							alert( 'Your number is registered.' );
+						} else {
+							alert( 'We cannot find your number in our database. Please check your input or register again.' );
+						}
+					} else {
+						console.log( typeof result.result );
+						console.log( typeof result );
+						console.log( result );
+					}
+				},
+				failure: function( result ) {
+					alert( 'An error occurred when communicating with server. Please refresh the page and try again.' );
+				}
+			} );
+		}
+		
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,41 @@
+README
+
+Voting Control Format:
+
+HTTP POST '/votectrl'
+
+	Parameters:
+	
+		opcode: ( setcid | setstate | addscore )
+		
+		cid: <number> - Mandantory when opcode is 'setcid'
+			ID of new candidate
+						
+		concluded: ( true ) - Optional when opcode is 'setcid'
+			Set to true to sum up scores and votes and write to database 			
+			before switching candidate
+		
+		newState: ( IDLE | VOTING | RESULT | RANK ) - Mandantory field when opcode is 'setstate'
+			New state
+		
+		acceptingVotes: ( true ) - Optional when opcode is 'setstate'
+			Setting state to 'VOTING' will automatically start accepting votes
+			Setting state to 'RESULT' or 'IDLE' will automatically stop accepting votes
+			Use this option to override default.
+		
+		candidate: <number> - Mandantory when opcode is 'addscore'
+			Candidate ID, must be current candidate
+		
+		score: <number> - Mandantory when opcode is 'addscore'
+			Score to be added to current candidate
+			
+		reset: ( true ) - Optional when opcode is 'addscore'
+			Set score to 'score' instead of adding it to previous score
+			
+			
+			
+			
+HTTP GET '/result'
+	
+	Return current state and data accordingly in a JSON object.
+			
