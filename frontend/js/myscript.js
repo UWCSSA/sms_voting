@@ -3,6 +3,7 @@ var pollflag=false;
 var pollctr;
 var counter=0;
 
+var updateCandidatesFlag = true;
 // function updatepoll(result){
 // 	console.log(typeof result);
 
@@ -28,37 +29,38 @@ var counter=0;
 // }
 
 function updatevote(result){
-	var candidateNum = result.data.candidates.length;
 
-	if (result.mode === 'vote' && result.state === 'IDLE'){
+	if (result.mode === 'vote' && result.state === "IDLE") {
+		// result is null do nothing
 		$('h1').html("比赛进行中");
-
 		$("#poll").hide();
 		$("#voting").hide();
-
-		// update candidate information
-		// hide third column
-		if (candidateNum === 2) {
-			$('table tr > :nth-child(3)').hide();
-		}
-		$('#c_id0').html(result.data.candidates[0].c_id+"号");
-		$('#c_id1').html(result.data.candidates[1].c_id+"号");
-		if (candidateNum === 3) {
-			$('#c_id2').html(result.data.candidates[2].c_id+"号");
-		}
-		// update picture
-		// TODO
-		// name
-		$('#c_name0').html(result.data.candidates[0].c_name);
-		$('#c_name1').html(result.data.candidates[1].c_name);
-		if (candidateNum === 3) {
-			$('#c_name2').html(result.data.candidates[2].c_name);
-		}
+		updateCandidatesFlag = true;
 	}
-
 	else if (result.mode === 'vote') {
-		$('#voting').show();
-		$("#poll").hide();
+		var candidateNum = result.data.candidates.length;
+		// use a flag to avoid loading extra data
+		if (updateCandidatesFlag) {
+			updateCandidatesFlag = false;
+			// hide third column
+			if (candidateNum === 2) {
+				$('table tr > :nth-child(3)').hide();
+			}
+			// update candidate information
+			$('#c_id0').html(result.data.candidates[0].cid+"号");
+			$('#c_id1').html(result.data.candidates[1].cid+"号");
+			if (candidateNum === 3) {
+				$('#c_id2').html(result.data.candidates[2].cid+"号");
+			}
+			// update picture
+			// TODO
+			// name
+			$('#c_name0').html(result.data.candidates[0].name);
+			$('#c_name1').html(result.data.candidates[1].name);
+			if (candidateNum === 3) {
+				$('#c_name2').html(result.data.candidates[2].name);
+			}
+		}
 
 		if (result.state === "VOTING"){
 			$('h1').html('投票进行中');
@@ -66,11 +68,12 @@ function updatevote(result){
 			$('#total').hide();
 
 			$('#timer').html(result.data.timerRemain);
+
 			// update score
-			$('#c_score0').html(result.data.candidates[0].c_score);
-			$('#c_score1').html(result.data.candidates[1].c_score);
+			$('#c_score0').html(result.data.candidates[0].score);
+			$('#c_score1').html(result.data.candidates[1].score);
 			if (candidateNum === 3) {
-				$('#c_score2').html(result.data.candidates[2].c_score);
+				$('#c_score2').html(result.data.candidates[2].score);
 			}
 			// update votes
 			$('#c_votes0').html(result.data.candidates[0].votes);
@@ -88,12 +91,19 @@ function updatevote(result){
 			$('h1').html('投票结果');
 			$('#total').show();
 
-			var t0 = result.data.candidates[0].votes + result.data.candidates[0].score;
-			var t1 = result.data.candidates[1].votes + result.data.candidates[1].score;
+			var totalVotes = 0;
+			totalVotes += result.data.candidates[0].votes;
+			totalVotes += result.data.candidates[1].votes;
+			if (candidateNum === 3) {
+				totalVotes += result.data.candidates[2].votes;
+			}
+
+			var t0 = computeTotal(result.data.candidates[0].votes, totalVotes, result.data.candidates[0].score);
+			var t1 = computeTotal(result.data.candidates[1].votes, totalVotes, result.data.candidates[1].score);
 			$('#c_total0').html(t0);
 			$('#c_total1').html(t1);
 			if (candidateNum === 3) {
-				var t2 = result.data.candidates[2].votes + result.data.candidates[2].score;
+				var t2 = computeTotal(result.data.candidates[2].votes, totalVotes, result.data.candidates[2].score);
 				$('#c_total2').html(t2);
 			}
 		}
@@ -112,7 +122,7 @@ function updatevote(result){
 function update(){
 	$.ajax({
 		type: 'GET' ,
-		url: 'http://sms.uwcssa.com:8081/result',
+		url: 'http://localhost:8081/result',
 		dataType: 'json',
 		success: function( result ){
 			updatevote(result);
@@ -120,6 +130,10 @@ function update(){
 	});
 }
 
-// $(document).ready(function(){
-// 	setInterval("update()",1000);
-// });
+function computeTotal(votes, totalVotes, score) {
+	return votes / totalVotes * 40 + score * 0.6;
+}
+
+$(document).ready(function(){
+	setInterval("update()",5000);
+});
