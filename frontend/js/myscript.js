@@ -52,8 +52,6 @@ function updatevote(result){
 			if (candidateNum === 3) {
 				$('#c_id2').html(result.data.candidates[2].cid+"号");
 			}
-			// update picture
-			// TODO
 			// name
 			$('#c_name0').html(result.data.candidates[0].name);
 			$('#c_name1').html(result.data.candidates[1].name);
