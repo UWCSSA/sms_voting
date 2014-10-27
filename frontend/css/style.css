@@ -2,10 +2,28 @@ h1,table,th,#poll {text-align:center}
 /*.progress{
   transform: rotate(-90deg);
 } */
-	
-#footer {
-    position: fixed;
-    bottom: 0px;
+
+/* center the image */
+#banner {
+	height: 250px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
 }
 
+#voting {
+	margin-top: 15px;
+}
 
+/*#footer {
+	margin-top: 5px;
+}
+*/
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 20px;
+}
+
+#poll {
+	font-size: 100px;
+}

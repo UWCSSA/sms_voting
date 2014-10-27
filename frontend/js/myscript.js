@@ -5,11 +5,10 @@ var updateCandidatesFlag = true;
 var pollflag = true;
 
 function updatepoll(result){
-	// animation
+	// fake animation
 	var s;
 	// return a random number between 0 and 3
 	var y = Math.floor((Math.random() * 4)); 
-
 	switch (y) {
 		case 0:
 			s = "647";
@@ -25,6 +24,7 @@ function updatepoll(result){
 			break;
 	}
 
+	// random numbers from 0-9
 	var x1=Math.floor((Math.random()*10));
 	var x2=Math.floor((Math.random()*10));
 	var x3=Math.floor((Math.random()*10));
@@ -37,7 +37,7 @@ function updatepoll(result){
 	// repeat 100 times
 	pollctr++;
 	
-	// display real lucky audiance
+	// display real value from server
 	if (pollctr === 100) {
 		clearInterval(pollid);
 		$("#poll").html(result.winner[1]+result.winner[2]+result.winner[3]+"XXXXXX"+result.winner[10]);
@@ -78,12 +78,14 @@ function updatevote(result){
 		}
 
 		if (result.state === "VOTING"){
-			$('h1').html('投票进行中');
+			var s = result.data.timerRemain;
+			if (s <= 20) {
+				s = '<span style="color:red">' + s + '</span>'
+			}
+			$('h1').html('投票进行中 ' + s);
 			
 			$('#voting').show();
 			$('#total').hide();
-
-			$('#timer').html(result.data.timerRemain);
 
 			// update score
 			$('#c_score0').html(result.data.candidates[0].score+" 分");
@@ -105,8 +107,6 @@ function updatevote(result){
 		}
 		else if (result.state === "VOTED"){
 			$('h1').html('投票结束');
-			$('#timer').html(0);
-			// TODO temporarily stop refreshing 
 		}
 		else if (result.state === 'RESULT'){
 			$('h1').html('投票结果');
@@ -152,8 +152,8 @@ function update(){
 
 function computeTotal(votes, totalVotes, score) {
 	// 60% from mentor, 40% from audiance, in another word,
-	// a candidate can get 100 if his mentor gives him 100 and 
-	// he gets all votes from audience
+	// a candidate can get 100 only if his mentor gives him 100
+	// and he gets all audience's votes
 	return votes / totalVotes * 40 + score * 0.6;
 }
 
