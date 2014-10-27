@@ -11,7 +11,7 @@
 	<script type="text/javascript" src="js/bootstrap.js"></script>
 	<script type="text/javascript">
 	
-	var baseURL = 'http://sms.uwcssa.com:8081';
+	var baseURL = 'http://localhost:8081';
 	
 	function sendVoteCommand( cmd ) {
 		$.ajax( {
@@ -443,7 +443,7 @@
 		} );
 	}
 	
-	setInterval( "updateResultBar()", 1000 );
+	setInterval( "updateResultBar()", 5000 );
 	</script>
 </body>
 	

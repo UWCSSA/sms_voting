@@ -1,0 +1,40 @@
+h1,table,th,#poll {text-align:center}
+/*.progress{
+  transform: rotate(-90deg);
+} */
+
+/* center the image */
+#banner {
+	height: 250px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#voting {
+	margin-top: 15px;
+}
+
+/*#footer {
+	margin-top: 5px;
+}
+*/
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+#voting {
+	font-size: 40px;
+}
+
+#repechage {
+	font-size: 20px;
+}
+
+#poll {
+	font-size: 100px;
+}
+
+.headRow {
+	background-color: #383838;
+}
