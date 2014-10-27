@@ -4,6 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="shortcut icon" href="img/icon.jpg">
 	<title>滑大好声音</title>
@@ -30,28 +31,31 @@
 				<td id="c_name1"></td>
 				<td id="c_name2"></td>
 			</tr>
+			<!-- pic -->
+			<tr>
+				<td id="c_votes0"></td>
+				<td id="c_votes1"></td>
+				<td id="c_votes2"></td>
+			</tr>
 			<tr>
 				<td>
 					<div class="progress">
-						<div class="progress-bar" id="c_votes0" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: %40;">
-							%20<!--display votes here-->
-						</div>
-					</div>
+	          <div class="progress-bar progress-bar-striped active" id="c_prog0" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+	          </div>
+        	</div>				
+        </td>
+				<td>
+					<div class="progress">
+	          <div class="progress-bar progress-bar-striped active" id="c_prog1" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+	          </div>
+        	</div>
 				</td>
 				<td>
 					<div class="progress">
-						<div class="progress-bar" id="c_votes1" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: %40;">
-							%40<!--display votes here-->
-						</div>
-					</div>
-				</td>
-				<td>
-					<div class="progress">
-						<div class="progress-bar" id="c_votes2" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: %40;">
-							%40<!--display votes here-->
-						</div>
-					</div>
-				</td>
+	          <div class="progress-bar progress-bar-striped active" id="c_prog2" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+	          </div>
+        	</div>			
+        </td>
 			</tr>
 			<tr>
 				<td id="c_score0"></td>
@@ -68,8 +72,11 @@
 
 	<!-- for poll -->
 	<div id="poll" class="container">
-
 	</div>
+
+<!-- 	<div id="footer" class="container">
+		<img id="banner" src="img/banner.png"/>
+	</div> -->
 
 	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>

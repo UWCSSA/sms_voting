@@ -1,4 +1,11 @@
-h1,table,th {text-align:center}
+h1,table,th,#poll {text-align:center}
 /*.progress{
   transform: rotate(-90deg);
 } */
+	
+#footer {
+    position: fixed;
+    bottom: 0px;
+}
+
+
