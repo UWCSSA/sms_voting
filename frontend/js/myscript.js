@@ -98,10 +98,11 @@ function updatepoll(response){
 	if (pollCtr >= 100) {
 		clearInterval(pollInterval);
 		$("#poll").html(response.winner[1]+response.winner[2]+response.winner[3]+"XXX"
-			+response.winner[7]+response.winner[8]+response[9]+response.winner[10]);
+			+response.winner[7]+response.winner[8]+response.winner[9]+response.winner[10]);
 	}
 }
 
+// need to change for the final round
 function computeTotal(votes, totalVotes, score) {
 	// 60% from mentor, 40% from audiance, in another word,
 	// a candidate can get 100 only if his mentor gives him 100
