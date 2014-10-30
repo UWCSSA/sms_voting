@@ -43,6 +43,7 @@ function update(response){
 		}
 		else if (response.state === "VOTED"){
 			$('h1').html('投票结束');
+			updateVotes(response);
 		}
 		else if (response.state === 'RESULT'){
 			$('h1').html('投票结果');
@@ -105,7 +106,11 @@ function computeTotal(votes, totalVotes, score) {
 	// 60% from mentor, 40% from audiance, in another word,
 	// a candidate can get 100 only if his mentor gives him 100
 	// and he gets all audience's votes
-	return votes / totalVotes * 40 + score * 0.6;
+	if (totalVotes === 0) {
+		return 0;
+	}
+	var total = votes / totalVotes * 40 + score * 0.6;
+	return total.toFixed(2); // round to 2 decimals
 }
 
 function setProgressBar(id, val) {
