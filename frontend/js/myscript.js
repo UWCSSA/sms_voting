@@ -1,10 +1,66 @@
-var pollctr = 0;
-var pollid;
+var pollInterval;
+var pollCtr = 0;
 
 var updateCandidatesFlag = true;
 var pollflag = true;
 
-function updatepoll(result){
+function refresh(){
+	$.ajax({
+		type: 'GET' ,
+		url: 'http://test.tinnytian.com:8081/result',
+		dataType: 'json',
+		success: function(response){
+			update(response);
+		}
+	});
+}
+
+
+function update(response){
+
+	if (response.mode === 'vote' && response.state === "IDLE") {
+		// response is null do nothing
+		$('h1').html("比赛进行中");
+		hideAll();
+		resetGlobalVars();
+	}
+	else if (response.mode === 'vote') {
+		$("#poll").hide();
+		
+		// use a flag to avoid loading extra data
+		if (updateCandidatesFlag) {
+			updateCandidatesFlag = false;
+			updateCandidatesInfo(response);
+		}
+
+		if (response.state === "VOTING"){
+			var s = response.data.timerRemain;
+			if (s <= 20) {
+				s = '<span style="color:red">' + s + '</span>'
+			}
+			$('h1').html('投票进行中 ' + s);
+			updateVotes(response);
+		}
+		else if (response.state === "VOTED"){
+			$('h1').html('投票结束');
+		}
+		else if (response.state === 'RESULT'){
+			$('h1').html('投票结果');
+			updateResults(response);
+		}
+	}
+	else if (response.mode === 'poll' && pollflag) {
+		pollflag = false;
+		$('h1').html("抽奖");
+		$('#voting').hide();
+		$('#repechage').hide();
+		$("#poll").show();
+
+		pollInterval = setInterval(function(){updatepoll(response);},30);
+	}
+}
+
+function updatepoll(response){
 	// fake animation
 	var s;
 	// return a random number between 0 and 3
@@ -35,166 +91,14 @@ function updatepoll(result){
 
 	$('#poll').html(s+x1+x2+x3+x4+x5+x6+x7);
 	// repeat 100 times
-	pollctr++;
+	pollCtr++;
 	
 	// display real value from server
-	if (pollctr === 100) {
-		clearInterval(pollid);
-		$("#poll").html(result.winner[1]+result.winner[2]+result.winner[3]+"XXXXXX"+result.winner[10]);
+	if (pollCtr >= 100) {
+		clearInterval(pollInterval);
+		$("#poll").html(response.winner[1]+response.winner[2]+response.winner[3]+"XXX"
+			+response.winner[7]+response.winner[8]+response[9]+response.winner[10]);
 	}
-}
-
-function updatevote(result){
-
-	if (result.mode === 'vote' && result.state === "IDLE") {
-		// result is null do nothing
-		$('h1').html("比赛进行中");
-		hideAll();
-
-		updateCandidatesFlag = true;
-		pollflag = true;
-	}
-	else if (result.mode === 'vote') {
-		$("#poll").hide();
-		
-		var candidateNum = result.data.candidates.length;
-		// use a flag to avoid loading extra data
-		if (updateCandidatesFlag) {
-			updateCandidatesFlag = false;
-			// hide third column
-			if (candidateNum <= 3) {
-				if (candidateNum === 2) {
-					// hide third column
-					$('table tr > :nth-child(3)').hide();
-				}
-				// update candidate information, id and name
-				for (var i = 0; i < candidateNum; i++) {
-					$('#c_id'+i).html(result.data.candidates[i].cid+"号");
-				}
-				for (var i = 0; i < candidateNum; i++) {
-					$('#c_name'+i).html(result.data.candidates[i].name);
-				}
-			}
-			// repechage
-			else if (candidateNum === 12) {
-				for (var i = 0; i < candidateNum; i++) {
-					$('#r_id'+i).html(result.data.candidates[i].cid+"号");
-				}
-				for (var i = 0; i < candidateNum; i++) {
-					$('#r_name'+i).html(result.data.candidates[i].name);
-				}
-			}
-		}
-
-		if (result.state === "VOTING"){
-			var s = result.data.timerRemain;
-			if (s <= 20) {
-				s = '<span style="color:red">' + s + '</span>'
-			}
-			$('h1').html('投票进行中 ' + s);
-			
-			$('#total').hide();
-
-			// repechage
-			if (candidateNum === 12) {
-				$('#voting').hide();
-				$('#repechage').show();
-				for (var i = 0; i < candidateNum; i++) {
-					$('#r_votes'+i).html(result.data.candidates[i].votes+" 票");
-				}
-			}
-			// competition
-			else {
-				$('#repechage').hide();
-				$('#voting').show();
-				// update score and votes
-				for (var i = 0; i < candidateNum; i++) {
-					$('#c_score'+i).html(result.data.candidates[i].score+" 分");
-				}
-				for (var i = 0; i < candidateNum; i++) {
-					$('#c_votes'+i).html(result.data.candidates[i].votes+" 票");
-				}
-				// update progress bar
-				var maxVotes = result.data.maxVotes;
-				for (var i = 0; i < candidateNum; i++) {
-					setProgressBar("#c_prog"+i, result.data.candidates[i].votes / maxVotes * 100);
-				}
-			}
-		}
-		else if (result.state === "VOTED"){
-			$('h1').html('投票结束');
-		}
-		else if (result.state === 'RESULT'){
-			$('h1').html('投票结果');
-
-			// competition
-			if (candidateNum <= 3) {
-				// calculate total votes
-				var totalVotes = 0;
-				for (var i = 0; i < candidateNum; i++) {
-					totalVotes += result.data.candidates[i].votes;
-				}
-				// calculate total score
-				for (var i = 0; i < candidateNum; i++) {
-					var t = computeTotal(result.data.candidates[i].votes, totalVotes, result.data.candidates[i].score);
-					totalVotes += result.data.candidates[i].votes;
-					$('#c_total'+i).html("总分 " + t);
-				}
-				$('#voting').show();
-				$('#total').show();
-				$('#repechage').hide();
-			}
-			// repechage
-			else if (candidateNum === 12) {
-				// find max
-				var max = -1;
-				var index;
-				for (var i = 0; i < candidateNum; i++) {
-					disableHighlight(i);
-					var votes = result.data.candidates[i].votes;
-					if (votes > max) {
-						max = votes;
-						index = i;
-					}
-					// in case of multiple winners
-					else if (votes === max) {
-						index = index + "," + i;
-					}
-				}
-				if (typeof index === "number") {
-					setHighlight(index);
-				}
-				if (typeof index === "string") {
-					var winners = index.split(",");
-					for (var i in winners) {
-						setHighlight(winners[i]);
-					}
-				}
-				$('#voting').hide();
-				$('#repechage').show();
-			}
-		}
-	}
-	else if (result.mode === 'poll' && pollflag) {
-		pollflag = false;
-		$('h1').html("抽奖");
-		$('#voting').hide();
-		$('#repechage').hide();
-		$("#poll").show();
-
-		pollid = setInterval(function(){updatepoll(result);},30);
-	}
-}
-
-function update(){
-	$.ajax({
-		type: 'GET' ,
-		url: 'http://localhost:8081/result',
-		dataType: 'json',
-		success: function( result ){
-			updatevote(result);
-		}
-	});
 }
 
 function computeTotal(votes, totalVotes, score) {
@@ -228,6 +132,122 @@ function hideAll() {
 	$('#repechage').hide();
 }
 
+function resetGlobalVars() {
+	updateCandidatesFlag = true;
+	pollflag = true;
+	pollCtr = 0;
+}
+
+function updateCandidatesInfo(response) {
+	var candidateNum = response.data.candidates.length;
+	// hide third column
+	if (candidateNum <= 3) {
+		if (candidateNum === 2) {
+			// hide third column
+			$('table tr > :nth-child(3)').hide();
+		}
+		// update candidate information, id and name
+		for (var i = 0; i < candidateNum; i++) {
+			$('#c_id'+i).html(response.data.candidates[i].cid+"号");
+		}
+		for (var i = 0; i < candidateNum; i++) {
+			$('#c_name'+i).html(response.data.candidates[i].name);
+		}
+	}
+	// repechage
+	else if (candidateNum === 12) {
+		for (var i = 0; i < candidateNum; i++) {
+			$('#r_id'+i).html(response.data.candidates[i].cid+"号");
+		}
+		for (var i = 0; i < candidateNum; i++) {
+			$('#r_name'+i).html(response.data.candidates[i].name);
+		}
+	}
+}
+
+
+function updateVotes(response) {
+	var candidateNum = response.data.candidates.length;
+	// repechage
+	if (candidateNum === 12) {
+		$('#voting').hide();
+		$('#repechage').show();
+		for (var i = 0; i < candidateNum; i++) {
+			$('#r_votes'+i).html(response.data.candidates[i].votes+" 票");
+		}
+	}
+	// competition
+	else {
+		$('#repechage').hide();
+		$('#voting').show();
+		$('#total').hide();
+		// update score and votes
+		for (var i = 0; i < candidateNum; i++) {
+			$('#c_score'+i).html(response.data.candidates[i].score+" 分");
+		}
+		for (var i = 0; i < candidateNum; i++) {
+			$('#c_votes'+i).html(response.data.candidates[i].votes+" 票");
+		}
+		// update progress bar
+		var maxVotes = response.data.maxVotes;
+		for (var i = 0; i < candidateNum; i++) {
+			setProgressBar("#c_prog"+i, response.data.candidates[i].votes / maxVotes * 100);
+		}
+	}
+}
+
+
+function updateResults(response) {
+	var candidateNum = response.data.candidates.length;
+	// competition
+	if (candidateNum <= 3) {
+		// calculate total votes
+		var totalVotes = 0;
+		for (var i = 0; i < candidateNum; i++) {
+			totalVotes += response.data.candidates[i].votes;
+		}
+		// calculate total score
+		for (var i = 0; i < candidateNum; i++) {
+			var t = computeTotal(response.data.candidates[i].votes, totalVotes, response.data.candidates[i].score);
+			totalVotes += response.data.candidates[i].votes;
+			$('#c_total'+i).html("总分 " + t);
+		}
+		$('#voting').show();
+		$('#total').show();
+		$('#repechage').hide();
+	}
+	// repechage
+	else if (candidateNum === 12) {
+		// find max
+		var max = -1;
+		var index;
+		for (var i = 0; i < candidateNum; i++) {
+			disableHighlight(i);
+			var votes = response.data.candidates[i].votes;
+			if (votes > max) {
+				max = votes;
+				index = i;
+			}
+			// in case of multiple winners
+			else if (votes === max) {
+				index = index + "," + i;
+			}
+		}
+		if (typeof index === "number") {
+			setHighlight(index);
+		}
+		if (typeof index === "string") {
+			var winners = index.split(",");
+			for (var i in winners) {
+				setHighlight(winners[i]);
+			}
+		}
+		$('#voting').hide();
+		$('#repechage').show();
+	}
+}
+
+
 $(document).ready(function(){
-	setInterval(update,1000);
+	setInterval(refresh,1000);
 });
