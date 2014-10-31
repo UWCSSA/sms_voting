@@ -107,10 +107,14 @@ function computeTotal(votes, totalVotes, score) {
 	// 60% from mentor, 40% from audiance, in another word,
 	// a candidate can get 100 only if his mentor gives him 100
 	// and he gets all audience's votes
+	var total;
 	if (totalVotes === 0) {
-		return 0;
+		// if an error occurs and no votes received, use score
+		total = score * 0.6;
 	}
-	var total = votes / totalVotes * 40 + score * 0.6;
+	else {
+		total = votes / totalVotes * 40 + score * 0.6;
+	}
 	return total.toFixed(2); // round to 2 decimals
 }
 
@@ -179,6 +183,7 @@ function updateVotes(response) {
 		$('#voting').hide();
 		$('#repechage').show();
 		for (var i = 0; i < candidateNum; i++) {
+			disableHighlight(i)
 			$('#r_votes'+i).html(response.data.candidates[i].votes+" 票");
 		}
 	}
@@ -228,7 +233,6 @@ function updateResults(response) {
 		var max = -1;
 		var index;
 		for (var i = 0; i < candidateNum; i++) {
-			disableHighlight(i);
 			var votes = response.data.candidates[i].votes;
 			if (votes > max) {
 				max = votes;

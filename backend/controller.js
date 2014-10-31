@@ -116,7 +116,7 @@ Controller.prototype.pollAudienceWinner = function( cmd ) {
 		self.pollWinner = result[ selection ];
 		if( notify ) {
 			setTimeout( function() {
-				self.smsParser.sendMessage( result[ selection ], 'Congratulations on winning Fallsview King Suite price.' );
+				self.smsParser.sendMessage( result[ selection ], 'Congratulations on winning a prize' );
 			}, delayNotify * 1000 );
 		}
 	} );
