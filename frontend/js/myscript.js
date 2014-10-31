@@ -220,7 +220,6 @@ function updateResults(response) {
 		// calculate total score
 		for (var i = 0; i < candidateNum; i++) {
 			var t = computeTotal(response.data.candidates[i].votes, totalVotes, response.data.candidates[i].score);
-			totalVotes += response.data.candidates[i].votes;
 			$('#c_total'+i).html("总分 " + t);
 		}
 		$('#voting').show();
