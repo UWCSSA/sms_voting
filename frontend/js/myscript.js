@@ -183,6 +183,7 @@ function updateVotes(response) {
 		$('#voting').hide();
 		$('#repechage').show();
 		for (var i = 0; i < candidateNum; i++) {
+			disableHighlight(i)
 			$('#r_votes'+i).html(response.data.candidates[i].votes+" 票");
 		}
 	}
@@ -232,7 +233,6 @@ function updateResults(response) {
 		var max = -1;
 		var index;
 		for (var i = 0; i < candidateNum; i++) {
-			disableHighlight(i);
 			var votes = response.data.candidates[i].votes;
 			if (votes > max) {
 				max = votes;
