@@ -113,7 +113,8 @@ function computeTotal(votes, totalVotes, score) {
 		total = score * 0.6;
 	}
 	else {
-		total = votes / totalVotes * 40 + score * 0.6;
+		// total = votes / totalVotes * 40 + score * 0.6;
+		total = votes / totalVotes * 50 + score * 0.5;
 	}
 	return total.toFixed(2); // round to 2 decimals
 }
@@ -152,10 +153,15 @@ function updateCandidatesInfo(response) {
 	var candidateNum = response.data.candidates.length;
 	// hide third column
 	if (candidateNum <= 3) {
+		// change table structure
 		if (candidateNum === 2) {
 			// hide third column
 			$('table tr > :nth-child(3)').hide();
 		}
+		else if (candidateNum === 3) {
+			$('table tr > :nth-child(3)').show();
+		}
+
 		// update candidate information, id and name
 		for (var i = 0; i < candidateNum; i++) {
 			$('#c_id'+i).html(response.data.candidates[i].cid+"号");
@@ -165,7 +171,8 @@ function updateCandidatesInfo(response) {
 		}
 	}
 	// repechage
-	else if (candidateNum === 12) {
+//	else if (candidateNum === 12) {
+	else if (candidateNum === 4) {
 		for (var i = 0; i < candidateNum; i++) {
 			$('#r_id'+i).html(response.data.candidates[i].cid+"号");
 		}
@@ -179,7 +186,8 @@ function updateCandidatesInfo(response) {
 function updateVotes(response) {
 	var candidateNum = response.data.candidates.length;
 	// repechage
-	if (candidateNum === 12) {
+//	if (candidateNum === 12) {
+	if (candidateNum === 4) {
 		$('#voting').hide();
 		$('#repechage').show();
 		for (var i = 0; i < candidateNum; i++) {
@@ -227,7 +235,8 @@ function updateResults(response) {
 		$('#repechage').hide();
 	}
 	// repechage
-	else if (candidateNum === 12) {
+//	else if (candidateNum === 12) {
+	else if (candidateNum === 4) {
 		// find max
 		var max = -1;
 		var index;

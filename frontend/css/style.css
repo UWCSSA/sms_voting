@@ -25,7 +25,13 @@ body {
 }
 
 #repechage {
-	font-size: 35px;
+	/* 
+	preliminary
+	font-size: 35px; 
+	*/
+	
+	/* final */
+	font-size: 60px;
 }
 
 #poll {
